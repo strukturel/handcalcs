@@ -359,7 +359,7 @@ def categorize_line(
     if test_for_intertext_line(line):
         return IntertextLine(line, "", "")
 
-    if line.startswith("#"):
+    if line.lstrip(" /t").startswith("#"):
         return BlankLine(line, "", "")
 
     try:
@@ -1834,7 +1834,7 @@ def test_for_intertext_line(source: str) -> bool:
     """
     Returns True if 'source' appears to be an intertext line
     """
-    return source.startswith("##")
+    return source.lstrip(" /t").startswith("##")
 
 
 def test_for_numeric_line(
