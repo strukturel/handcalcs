@@ -1693,7 +1693,7 @@ def format_symbolic_line(line: SymbolicLine, **config_options) -> SymbolicLine:
 
 @format_lines.register(IntertextLine)
 def format_intertext_line(line: IntertextLine, **config_options) -> IntertextLine:
-    cleaned_line = line.line.replace("##", "")
+    cleaned_line = line.line.replace("##", "", 1)
     line.latex = f"& \\textrm{{{cleaned_line}}}"
     return line
 

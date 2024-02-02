@@ -38,7 +38,11 @@ def handcalc(
                     ModuleNotFoundError(
                         "jupyter_display option requires IPython.display to be installed."
                     )
-                display(Latex(latex_code))
+                if not "& \\textrm{" in latex_code:
+                    display(Latex(latex_code))
+                else:
+                    # display(Latex(latex_code))
+                    display_latex_and_markdown(latex_code)
                 return scope.return_value
 
             # https://stackoverflow.com/questions/9943504/right-to-left-string-replace-in-python
@@ -86,3 +90,33 @@ def _func_source_to_cell(source: str):
         ):
             acc.append(line)
     return "\n".join(acc)
+
+
+def display_latex_and_markdown(latex_code: str):
+    try:
+        from IPython.display import Latex, Markdown, display
+    except ModuleNotFoundError:
+        ModuleNotFoundError(
+            "jupyter_display option requires IPython.display to be installed."
+        )
+    latex_code = latex_code.split("\n")
+    latex_start = "\n".join(latex_code[:2])
+    latex_end = "\n".join(latex_code[-2:])
+
+    latex = latex_start
+    for line in latex_code[2:-2]:
+        if not line.startswith("& \\textrm{"):
+            latex = "\n".join([latex, line])
+            continue
+
+        if latex != latex_start:
+            latex = "\n".join([latex, latex_end])
+            display(Latex(latex))
+            latex = latex_start
+
+        line = line[line.find("{") + 1 : line.find("}")].strip()
+        display(Markdown(line))
+
+    if latex != latex_start:
+        latex = "\n".join([latex, latex_end])
+        display(Latex(latex))
