@@ -31,6 +31,7 @@ from handcalcs.constants import GREEK_UPPER, GREEK_LOWER
 from handcalcs import global_config
 from handcalcs.integrations import DimensionalityError
 
+
 # Six basic line types
 @dataclass
 class CalcLine:
@@ -1269,7 +1270,7 @@ def latex_repr(
                     f"\\left( {rendered_real} + {rendered_imag} j \\right)"
                 )
             elif use_scientific_notation and not isinstance(item, int):
-                rendered_string = f"{item:.{precision}e}"
+                rendered_string = float_to_eng_not(item, precision)
                 rendered_string = swap_scientific_notation_str(rendered_string)
             elif not isinstance(item, int):
                 rendered_string = f"{item:.{precision}f}"
@@ -1280,7 +1281,6 @@ def latex_repr(
                 rendered_string = item._repr_latex_()
             except AttributeError:
                 rendered_string = str(item)
-
     return rendered_string.replace("$", "")
 
 
@@ -2690,6 +2690,21 @@ def swap_scientific_notation_str(item: str) -> str:
     return new_item
 
 
+def float_to_eng_not(value: float, precision: int) -> str:
+    exponent = 0
+    while abs(value) >= 1000:
+        value /= 1000
+        exponent += 3
+    while abs(value) < 1:
+        value *= 1000
+        exponent -= 3
+    if exponent > 0:
+        return f"{value:.{precision}f}e+{exponent}"
+    elif exponent < 0:
+        return f"{value:.{precision}f}e{exponent}"
+    return f"{value:.{precision}f}"
+
+
 def swap_scientific_notation_float(
     line: deque, precision: int, **config_options
 ) -> deque:
@@ -2838,9 +2853,11 @@ def swap_for_greek(pycode_as_deque: deque, **config_options) -> deque:
         elif "_" in str(item):
             components = str(item).split("_")
             swapped_components = [
-                dict_get(greek_chainmap, component)
-                if component not in greeks_to_exclude
-                else component
+                (
+                    dict_get(greek_chainmap, component)
+                    if component not in greeks_to_exclude
+                    else component
+                )
                 for component in components
             ]
             new_item = "_".join(swapped_components)

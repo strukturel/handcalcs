@@ -12,9 +12,9 @@ def handcalc(
     precision: int = 3,
     left: str = "",
     right: str = "",
-    scientific_notation: Optional[bool] = None,
+    scientific_notation: Optional[bool] = True,
     decimal_separator: str = ".",
-    jupyter_display: bool = False,
+    jupyter_display: bool = True,
 ):
     def handcalc_decorator(func):
         @wraps(func)
@@ -41,7 +41,6 @@ def handcalc(
                 if not "& \\textrm{" in latex_code:
                     display(Latex(latex_code))
                 else:
-                    # display(Latex(latex_code))
                     display_latex_and_markdown(latex_code)
                 return scope.return_value
 
